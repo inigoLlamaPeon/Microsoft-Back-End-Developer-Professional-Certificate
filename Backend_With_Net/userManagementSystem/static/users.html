@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .left-column, .right-column {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+        }
+        .left-column {
+            flex: 2;
+        }
+        .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .right-column button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .right-column button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center; /* Center align text in table cells */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .usrDiag {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .usrDiag label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .usrDiag input {
+            width: 91%; /* Reduce the width */
+            padding: 8px;
+            margin: 0 auto 16px auto; /* Center the input elements */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .usrDiag .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .usrDiag .button-container button {
+            width: 48%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .usrDiag .button-container .add-button {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        .usrDiag .button-container .add-button:hover {
+            background-color: #0056b3;
+        }
+        .usrDiag .button-container .cancel-button {
+            background-color: red;
+            color: #fff;
+        }
+        .usrDiag .button-container .cancel-button:hover {
+            background-color: darkred;
+        }
+        
+        .logout-container {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+        }
+        .logout-button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #0056b3;
+        }
+
+        .dialog_edit {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: 400px;
+        }
+        .dialog_edit label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .dialog_edit .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .dialog_edit .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .dialog_edit .button-container button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .dialog_edit .button-container button#editButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .dialog_edit .button-container button#saveButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .dialog_edit .button-container button#cancelButton {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-container">
+        <button class="logout-button" id="logoutButton" style="position: absolute; top: 10px; right: 10px;">Logout</button>
+    </div>
+    <div class="container">
+        <div class="left-column">
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Job</th>
+                        <th>Salary</th>
+                        <th>Select</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Users will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="right-column">
+            <button id="addUserButton">Add User</button>
+            <button id="deleteSelectedUsers" onclick="deleteSelectedUsers()">Delete Selected Users</button>
+            <button id="editUsers" onclick="showEditDialog()">Edit Users</button>
+        </div>
+    </div>
+
+    <div id="userDialog" class="usrDiag">
+        <form id="userForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+            <label for="job">Job:</label>
+            <input type="text" id="job" name="job" required>
+            <label for="salary">Salary:</label>
+            <input type="number" id="salary" name="salary" required>
+            <div class="button-container">
+                <button type="submit" class="add-button">Add User</button>
+                <button type="button" class="cancel-button" onclick="closeDialog()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="editUserDialog" class="usrDiag">
+        <div id="editUserDialogList">
+            <!-- User list with radio buttons will be populated here -->
+        </div>
+        <div class="button-container" style="width: 300px;">
+            <button onclick="editUser()" style="background-color: #4CAF50; color: white;">Edit</button>
+            <button onclick="hideEditDialog()" style="background-color: #f44336; color: white;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="editDetailsDialog" class="dialog_edit">
+        <label for="editUserName">Name</label>
+        <p id="editUserName"></p>
+        <label for="editUserAge">Age</label>
+        <input type="number" id="editUserAge">
+        <label for="editUserJob">Job</label>
+        <input type="text" id="editUserJob">
+        <label for="editUserSalary">Salary</label>
+        <input type="number" id="editUserSalary">
+        <div class="button-container">
+            <button id="saveButton" onclick="saveUserDetails()">Save</button>
+            <button id="cancelButton" onclick="hideEditDetailsDialog()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+
+        function checkTokenExpiration() {
+            const tokenExpiration = localStorage.getItem('tokenExpiration');
+            if (!tokenExpiration || new Date().getTime() > tokenExpiration) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('tokenExpiration');
+                window.location.href = '/login';
+            }
+        }
+
+        // Check token expiration on page load
+        checkTokenExpiration();
+
+        // Optionally, you can set an interval to check token expiration periodically
+        setInterval(checkTokenExpiration, 60 * 1000); // Check every minute
+
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('tokenExpiration');
+            window.location.href = '/login';
+        });
+
+        document.getElementById('addUserButton').addEventListener('click', function() {
+            document.getElementById('userDialog').style.display = 'block';
+        });
+
+        document.getElementById('userForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const response = await fetch('/adduser', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                fetchUsers();
+                this.reset();
+                closeDialog();
+            } else {
+                console.error('Failed to create user');
+            }
+        });
+
+        function closeDialog() {
+            document.getElementById('userDialog').style.display = 'none';
+        }
+
+        async function fetchUsers() {
+            const response = await fetch('/readusers');
+            const users = await response.json();
+
+            const tbody = document.getElementById('usersTable').querySelector('tbody');
+            tbody.innerHTML = '';
+
+            if (users.length > 0) {
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.name}</td>
+                        <td>${user.age}</td>
+                        <td>${user.job}</td>
+                        <td>${user.salary}</td>
+                        <td><input type="checkbox" class="userCheckbox"></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        async function deleteSelectedUsers() {
+            const checkboxes = document.querySelectorAll('#usersTable input[type="checkbox"]:checked');
+            const names = Array.from(checkboxes).map(checkbox => {
+                const row = checkbox.closest('tr');
+                const nameCell = row.querySelector('td:nth-child(1)');
+                return nameCell.textContent;
+            });
+
+            if (names.length === 0) {
+                alert('No users selected');
+                return;
+            }
+
+            const response = await fetch('/deleteusers', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ names })
+            });
+
+            if (response.ok) {
+                fetchUsers();
+            } else {
+                alert('Failed to delete users');
+            }
+        }
+
+        function showEditDialog() {
+            const usersTable = document.getElementById('usersTable');
+            const rows = usersTable.getElementsByTagName('tr');
+            const userDialogList = document.getElementById('editUserDialogList');
+            userDialogList.innerHTML = '';
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+                const nameCell = rows[i].getElementsByTagName('td')[0];
+                const userName = nameCell.textContent;
+
+                const listItem = document.createElement('div');
+                listItem.style.display = 'flex';
+                listItem.style.justifyContent = 'space-between';
+                listItem.style.alignItems = 'left';
+                listItem.style.marginBottom = '8px';
+
+                const nameLabel = document.createElement('span');
+                nameLabel.textContent = userName;
+
+                const radioInput = document.createElement('input');
+                radioInput.type = 'radio';
+                radioInput.name = 'selectedUser';
+                radioInput.value = userName;
+                radioInput.style.alignContent = 'left';
+
+                // listItem.appendChild(radioInput);
+                listItem.appendChild(nameLabel);
+                listItem.appendChild(radioInput);
+                
+                userDialogList.appendChild(listItem);
+            }
+
+            document.getElementById('editUserDialog').style.display = 'block';
+        }
+
+        function hideEditDialog() {
+            document.getElementById('editUserDialog').style.display = 'none';
+        }
+
+        function hideEditDetailsDialog() {
+            document.getElementById('editDetailsDialog').style.display = 'none';
+        }
+
+        function showEditDetailsDialog(userName) {
+            document.getElementById('editDetailsDialog').style.display = 'block';
+            document.getElementById('editUserDialog').style.display = 'none';
+            document.getElementById('editUserName').textContent = userName;
+        }
+
+        function editUser() {
+            const selectedUser = document.querySelector('input[name="selectedUser"]:checked');
+            if (selectedUser) {
+                showEditDetailsDialog(selectedUser.value);
+            } else {
+                alert('No user selected');
+            }
+        }
+
+        function saveUserDetails() {
+            const userName = document.getElementById('editUserName').textContent;
+            const userJob = document.getElementById('editUserJob').value;
+            const userSalary = parseInt(document.getElementById('editUserSalary').value);
+            const userAge = parseInt(document.getElementById('editUserAge').value);
+
+            const userDetails = {
+                name: userName,
+                job: userJob,
+                salary: userSalary,
+                age: userAge
+            };
+
+            fetch('/edituser', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userDetails)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // alert('User details updated successfully');
+                    fetchUsers(); // Refresh the user list
+                } else {
+                    alert('Failed to update user details');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating user details');
+            });
+
+            hideEditDetailsDialog();
+        }
+
+        // Fetch users on page load
+        fetchUsers();
+    </script>
+</body>
+</html>
